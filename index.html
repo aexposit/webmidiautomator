@@ -12,8 +12,10 @@
   WebMidi
     .enable()
     .then(onEnabled)
-    .catch(err => alert(err));
-
+    .catch(err => document.body.innerHTML+= err);
+ 
+        
+        
   // Function triggered when WEBMIDI.js is ready
   function onEnabled() {
 
