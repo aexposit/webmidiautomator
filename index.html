@@ -16,10 +16,7 @@ window.navigator.requestMIDIAccess()
     }
   
 function onMIDISuccess(midiAccess) {
-    printString(midiAccess);
-
-    var inputs = midiAccess.inputs;
-    var outputs = midiAccess.outputs;
+    printString(JSON.stringify(midiAccess));
 }
 
 function onMIDIFailure() {
