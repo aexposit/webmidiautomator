@@ -1,0 +1,40 @@
+<html><head>
+<script type="text/javascript">
+    var midiAccess = null;
+    var midiInputs = null;
+    var midiOutputs = null;
+
+    function printString(str) {
+        var messagelog = document.getElementById('messagelog');
+        messagelog.innerHTML += str + "\n";
+        messagelog.scrollTop = messagelog.scrollHeight;
+    }
+
+    function setup() {
+window.navigator.requestMIDIAccess()
+    .then(onMIDISuccess, onMIDIFailure);
+    }
+  
+function onMIDISuccess(midiAccess) {
+    printString(midiAccess);
+
+    var inputs = midiAccess.inputs;
+    var outputs = midiAccess.outputs;
+}
+
+function onMIDIFailure() {
+    printString('Could not access your MIDI devices.');
+}
+   
+
+    window.onload = function() {
+        setup();
+    }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+</head>
+  <body>
+<h1 class="title">MIDI log</h1>
+<pre id="messagelog">
+</pre>
+</body></html>
