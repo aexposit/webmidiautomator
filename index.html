@@ -16,13 +16,35 @@ window.navigator.requestMIDIAccess()
   
 function onMIDISuccess(midiAccess) {
     printString("Successo");
-    for (let input of midiAccess.inputs.values()) {
-      printString("Input: " + input.name);
-    };
-    for (let output of midiAccess.output.values()) {
-      printString("Output: " + input.name);
-    };
+    var inputs = [];
+            var iter = midiAccess.inputs.values();
+            for (var o = iter.next(); !o.done; o = iter.next()) {
+                inputs.push(o.value);
+            }
 
+            for (var port = 0; port < inputs.length; port++) {
+
+                inputs[port].onstatechange = function (event) {
+                    var port = event.port;
+                    printString("MIDIInputPort onstatechange name:" + port.name + " connection:" + port.connection + " state:" + port.state);
+                };
+            }
+
+     var outputs = [];
+            var iter = midiAccess.outputs.values();
+            for (var o = iter.next(); !o.done; o = iter.next()) {
+                outputs.push(o.value);
+            }
+
+            for (var port = 0; port < outputs.length; port++) {
+                outputs[port].onstatechange = function (event) {
+                    var port = event.port;
+                    printString("MIDIOutputPort onstatechange name:" + port.name + " connection:" + port.connection + " state:" + port.state);
+                };
+            }
+
+            midiInputs = inputs;
+            midiOutputs = outputs;
 }
 
 function onMIDIFailure() {
