@@ -6,8 +6,7 @@
 
     function printString(str) {
         var messagelog = document.getElementById('messagelog');
-        messagelog.innerHTML += str + "\n";
-        messagelog.scrollTop = messagelog.scrollHeight;
+        messagelog.value += str + "\n";
     }
 
     function setup() {
@@ -39,6 +38,6 @@ function onMIDIFailure() {
 </head>
   <body>
 <h1 class="title">MIDI log</h1>
-<pre id="messagelog">
-</pre>
+<textarea id="messagelog">Testo qui
+</textarea>
 </body></html>
