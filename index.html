@@ -35,13 +35,6 @@
                 });
             }
 
-            const myAUM = WebMidi.inputs[0];
-            // const mySynth = WebMidi.getInputByName("TYPE NAME HERE!")
-
-            myAUM.addListener("noteon", e => {
-                document.body.innerHTML += `${e.note.name} <br>`;
-            });
-
         }
 
     </script>
