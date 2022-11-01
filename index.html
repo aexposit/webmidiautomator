@@ -39,6 +39,7 @@
             }
 
             for (var port = 0; port < inputs.length; port++) {
+                printReceivedMessage(port.name);
                 inputs[port].onmidimessage = function (event) {
                     printReceivedMessage(event.port, event.data);
                 };
@@ -56,6 +57,7 @@
             }
 
             for (var port = 0; port < outputs.length; port++) {
+                printReceivedMessage(port.name);
                 outputs[port].onmidimessage = function (event) {
                     printReceivedMessage(event.port, event.data);
                 };
