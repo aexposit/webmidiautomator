@@ -1,47 +1,132 @@
 <!DOCTYPE html>
-
+<!-- saved from url=(0044)https://aexposit.github.io/webmidiautomator/ -->
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>WebMidi.js Quick Start</title>
-    <script src="https://cdn.jsdelivr.net/npm/webmidi@latest/dist/iife/webmidi.iife.js"></script>
-    <script type="module">
 
-        // Enable WEBMIDI.js and trigger the onEnabled() function when ready
-        WebMidi
-            .enable()
-            .then(onEnabled)
-            .catch(err => document.body.innerHTML += err);
+    <style type="text/css">
+        .button {
+            color: #000000;
+            font-family: sans-serif;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            border: 2px solid #cccccc;
+            border-radius: 10px;
+            padding: 10px 0;
+            display: block;
+        }
 
+        .messagelog {
+            background: #eeeeee;
+            border: 2px solid #888888;
+            border-radius: 10px;
+            padding: 10px;
+            height: 80%;
+            overflow: auto;
+        }
 
+        .title {
+            color: #777777;
+            font-family: sans-serif;
+        }
 
-        // Function triggered when WEBMIDI.js is ready
-        function onEnabled() {
+        div.scroll {
+            width: 100px;
+            height: 500px;
+            overflow: scroll;
+        }
+    </style>
+    <script>
 
-            if (WebMidi.inputs.length < 1) {
-                document.body.innerHTML += "No input device detected.";
-            } else {
-                WebMidi.inputs.forEach((device, index) => {
-                    document.body.innerHTML += `IN: ${index}: ${device.name} <br>`;
-                });
+        function printString(str) {
+            var messagelog = document.getElementById('messagelog');
+            messagelog.innerHTML += str + "\n";
+            messagelog.scrollTop = messagelog.scrollHeight;
+        }
+
+        function printReceivedMessage(portName, data) {
+            var str = "port:" + portName + " ";
+            for (var i = 0; i < data.length; i++) {
+                str += data[i].toString(16) + " ";
             }
 
-            if (WebMidi.outputs.length < 1) {
-                document.body.innerHTML += "No output device detected.";
+            printString(str);
+        }
+
+        function initMidi() {
+
+            if (window.navigator.requestMIDIAccess) {
+
+                // Try to connect to the MIDI interface.
+                window.navigator.requestMIDIAccess().then(onSuccess, onFailure);
+
             } else {
-                WebMidi.outputs.forEach((device, index) => {
-                    document.body.innerHTML += `OUT: ${index}: ${device.name} <br>`;
-                });
+                console.log("Web MIDI API not supported!");
             }
+        }
+
+        function onSuccess(interface) {
+
+            // Grab an array of all available devices
+
+            var inputs = [];
+            var iter = interface.inputs.values();
+            for (var i = iter.next(); !i.done; i = iter.next()) {
+                inputs.push(i.value);
+
+            }
+            for (var port = 0; port < inputs.length; port++) {
+                printString("MIDIInputPort name:" + inputs[port].name + " connection:" + inputs[port].connection + " state:" + inputs[port].state);
+                inputs[port].onmidimessage = function (event) {
+                    printReceivedMessage(event.port, event.data);
+                };
+
+                inputs[port].onstatechange = function (event) {
+                    var port = event.port;
+                    printString("MIDIInputPort onstatechange name:" + port.name + " connection:" + port.connection + " state:" + port.state);
+                };
+            }
+
+            var outputs = [];
+            var iter = interface.outputs.values();
+            for (var o = iter.next(); !o.done; o = iter.next()) {
+                outputs.push(o.value);
+
+            }
+            for (var port = 0; port < outputs.length; port++) {
+                printString("MIDIOutputPort name:" + outputs[port].name + " connection:" + outputs[port].connection + " state:" + outputs[port].state);
+                outputs[port].onmidimessage = function (event) {
+                    printReceivedMessage(event.port, event.data);
+                };
+
+                outputs[port].onstatechange = function (event) {
+                    var port = event.port;
+                    printString("MIDIOutputPort onstatechange name:" + port.name + " connection:" + port.connection + " state:" + port.state);
+                };
+
+            }
+
 
         }
+        function onFailure(error) {
+            console.log("Could not connect to the MIDI interface");
+        }
+
 
     </script>
 </head>
 
 <body>
-    <h1>WebMidi.js Quick Start</h1>
+
+    <h1 class="title">MIDI input monitor</h1>
+    <div>
+        <pre id="messagelog" class="messagelog">
+    </pre>
+    </div>
+
+    <button onclick="initMidi()">Init</button>
+
 </body>
 
 </html>
