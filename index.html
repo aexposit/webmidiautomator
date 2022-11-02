@@ -41,10 +41,12 @@
 
         function parseMidiMessage(message) {
             return {
+                portType: message.target.type,
+                portName: message.target.name,
                 command: message.data[0] >> 4,
-                channel: message.data[0] & 0xf,
+                channel: (message.data[0] & 0xf) + 1,
                 note: message.data[1],
-                velocity: message.data[2] / 127
+                velocity: message.data[2]
             }
         }
 
@@ -54,10 +56,10 @@
             messagelog.scrollTop = messagelog.scrollHeight;
         }
 
-        function printReceivedMessage(data) {
+        function printReceivedMessage(event) {
             // Parse the MIDIMessageEvent.
-            const { command, channel, note, velocity } = parseMidiMessage(data)
-            var str = "Command: " + command + " " + "Channel: " + channel + " " + "Note: " + note + " " + "Velocity: " + velocity;
+            const { portType, portName, command, channel, note, velocity } = parseMidiMessage(event)
+            var str = "Type: " + portType + " " + "Name: " + portName + " " + "Command: " + command + " " + "Channel: " + channel + " " + "Note: " + note + " " + "Velocity: " + velocity;
             printString(str);
         }
 
@@ -86,7 +88,7 @@
             for (var port = 0; port < inputs.length; port++) {
                 printString("MIDIInputPort name:" + inputs[port].name + " connection:" + inputs[port].connection + " state:" + inputs[port].state);
                 inputs[port].onmidimessage = function (event) {
-                    printReceivedMessage(event.data);
+                    printReceivedMessage(event);
                 };
 
                 inputs[port].onstatechange = function (event) {
@@ -104,7 +106,7 @@
             for (var port = 0; port < outputs.length; port++) {
                 printString("MIDIOutputPort name:" + outputs[port].name + " connection:" + outputs[port].connection + " state:" + outputs[port].state);
                 outputs[port].onmidimessage = function (event) {
-                    printReceivedMessage(event.data);
+                    printReceivedMessage(event);
                 };
 
                 outputs[port].onstatechange = function (event) {
