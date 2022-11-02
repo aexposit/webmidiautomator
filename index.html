@@ -39,6 +39,8 @@
     </style>
     <script>
 
+        var myMidiAccess = null;
+        var myMidiPorts = [];
 
 
         function printString(str) {
@@ -47,23 +49,12 @@
             messagelog.scrollTop = messagelog.scrollHeight;
         }
 
-        function printReceivedMessage(portInfo, messageData) {
-            var portType =  portInfo.type;
-            var portName =  portInfo.name;
-            var command = messageData[0] >> 4;
-            var channel = (messageData[0] & 0xf) + 1;
-            var note = messageData[1];
-            var velocity = messageData[2];
-            var str = "Type: " + portType + " " + "Name: " + portName + " " + "Command: " + command + " " + "Channel: " + channel + " " + "Note: " + note + " " + "Velocity: " + velocity;
-            printString(str);
-        }
-
         function initMidi() {
 
             if (window.navigator.requestMIDIAccess) {
 
                 // Try to connect to the MIDI interface.
-                window.navigator.requestMIDIAccess().then(onSuccess, onFailure);
+                window.navigator.requestMIDIAccess({ sysex: false }).then(onSuccess, onFailure);
 
             } else {
                 console.log("Web MIDI API not supported!");
@@ -72,35 +63,37 @@
 
         function onSuccess(interface) {
 
-            // Grab an array of all available devices
+            // Get the global MIDIAccess
+            myMidiAccess = interface;
 
-            var inputs = [];
-            var iter = interface.inputs.values();
+
+            // Grab an array of all available ports from maps
+            var iter = myMidiAccess.inputs.values();
             for (var i = iter.next(); !i.done; i = iter.next()) {
-                inputs.push(i.value);
+                myMidiPorts.push(i.value);
 
             }
-            for (var port = 0; port < inputs.length; port++) {
-                printString("MIDIInputPort name:" + inputs[port].name + " connection:" + inputs[port].connection + " state:" + inputs[port].state);
-                inputs[port].onmidimessage = function (event) {
-                    var portInfo = event.target;
-                    var messageData = event.data;
-                    printReceivedMessage(portInfo, messageData);
-                };
 
-                inputs[port].onstatechange = function (event) {
-                    var port = event.port;
-                    printString("MIDIInputPort onstatechange name:" + port.name + " connection:" + port.connection + " state:" + port.state);
-                };
+            var iter = myMidiAccess.outputs.values();
+            for (var o = iter.next(); !o.done; o = iter.next()) {
+                myMidiPorts.push(o.value);
             }
 
-   
+
+            // Grab an array of all available ports
+
+            for (var portNum = 0; portNum < myMidiPorts.length; portNum++) {
+                printString("| Port type:" + myMidiPorts[portNum].type + " | Port name" + myMidiPorts[portNum].name + " | Connection:" + myMidiPorts[portNum].connection + " | State:" + myMidiPorts[portNum].state);
+            }
+
+
 
 
         }
         function onFailure(error) {
             console.log("Could not connect to the MIDI interface");
         }
+
 
 
     </script>
@@ -110,8 +103,7 @@
 
     <h1 class="title">MIDI input monitor</h1>
     <div>
-        <pre id="messagelog" class="messagelog">
-    </pre>
+        <pre id="messagelog" class="messagelog"></pre>
     </div>
 
     <button onclick="initMidi()">Init</button>
