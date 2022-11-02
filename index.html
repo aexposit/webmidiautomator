@@ -104,13 +104,19 @@
             }
 
 
-            function onMessageReceived(message) {
-                printString("Message arrived");
+            function onMessageReceived(data) {
+                var command = data[0] >> 4;
+                var channel = (data[0] & 0xf) + 1;
+                var note = data[1];
+                var velocity = data[2];
+                printString("| Mesg IN |Command: " + command + "| Channel: | " + channel + "| Note: | " + note + "| Velocity: | " + velocity);
             }
-
-
-
+            printString("Message arrived");
         }
+
+
+
+
         function onFailure(error) {
             console.log("Could not connect to the MIDI interface");
         }
