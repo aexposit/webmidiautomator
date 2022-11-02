@@ -39,18 +39,25 @@
     </style>
     <script>
 
+        function parseMidiMessage(message) {
+            return {
+                command: message.data[0] >> 4,
+                channel: message.data[0] & 0xf,
+                note: message.data[1],
+                velocity: message.data[2] / 127
+            }
+        }
+
         function printString(str) {
             var messagelog = document.getElementById('messagelog');
             messagelog.innerHTML += str + "\n";
             messagelog.scrollTop = messagelog.scrollHeight;
         }
 
-        function printReceivedMessage(portName, data) {
-            var str = "port:" + portName + " ";
-            for (var i = 0; i < data.length; i++) {
-                str += data[i].toString(16) + " ";
-            }
-
+        function printReceivedMessage(data) {
+            // Parse the MIDIMessageEvent.
+            const { command, channel, note, velocity } = parseMidiMessage(data)
+            var str = "Command: " + command + " " + "Channel: " + channel + " " + "Note: " + note + " " + "Velocity: " + velocity;
             printString(str);
         }
 
@@ -79,7 +86,7 @@
             for (var port = 0; port < inputs.length; port++) {
                 printString("MIDIInputPort name:" + inputs[port].name + " connection:" + inputs[port].connection + " state:" + inputs[port].state);
                 inputs[port].onmidimessage = function (event) {
-                    printReceivedMessage(event.port, event.data);
+                    printReceivedMessage(event.data);
                 };
 
                 inputs[port].onstatechange = function (event) {
@@ -97,7 +104,7 @@
             for (var port = 0; port < outputs.length; port++) {
                 printString("MIDIOutputPort name:" + outputs[port].name + " connection:" + outputs[port].connection + " state:" + outputs[port].state);
                 outputs[port].onmidimessage = function (event) {
-                    printReceivedMessage(event.port, event.data);
+                    printReceivedMessage(event.data);
                 };
 
                 outputs[port].onstatechange = function (event) {
