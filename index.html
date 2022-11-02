@@ -66,6 +66,16 @@
             // Get the global MIDIAccess
             myMidiAccess = interface;
 
+            interface.onstatechange = function (event) {
+                var port = event.port;
+                printString("| Port state change event | Name: " + port.name + " | Connection: " + port.connection + "| State:" + port.state);
+                if (port.type == "input" && port.state == "connected") {
+                    port.onmidimessage = function (event) {
+                        onMessageReceived(event.data);
+                    };
+                }
+            };
+
 
             // Grab an array of all available ports from maps
             var iter = myMidiAccess.inputs.values();
@@ -80,12 +90,21 @@
             }
 
 
-            // Grab an array of all available ports
+            // Grab an array of all available ports and initialise message listeners
 
             for (var portNum = 0; portNum < myMidiPorts.length; portNum++) {
-                printString("| Port type:" + myMidiPorts[portNum].type + " | Port name" + myMidiPorts[portNum].name + " | Connection:" + myMidiPorts[portNum].connection + " | State:" + myMidiPorts[portNum].state);
+                printString("| Port type: " + myMidiPorts[portNum].type + " | Port name: " + myMidiPorts[portNum].name + " | Connection: " + myMidiPorts[portNum].connection + " | State: " + myMidiPorts[portNum].state);
+                if (myMidiPorts[portNum].type == "input") {
+                    myMidiPorts[portNum].onmidimessage = function (event) {
+                        onMessageReceived(event.data);
+                    };
+                }
             }
 
+
+            function onMessageReceived(message) {
+                printString("Message arrived");
+            }
 
 
 
