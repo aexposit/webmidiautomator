@@ -41,8 +41,8 @@
 
         function parseMidiMessage(message) {
             return {
-                portType: message.target.type,
-                portName: message.target.name,
+                portType: "Dummy",
+                portName: "Dummy",
                 command: message.data[0] >> 4,
                 channel: (message.data[0] & 0xf) + 1,
                 note: message.data[1],
