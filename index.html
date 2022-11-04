@@ -39,8 +39,6 @@
     </style>
     <script>
 
-        var myMidiAccess = null;
-        var myMidiPorts = [];
 
         function clearLog() {
             document.getElementById("messagelog").innerHTML = "";
@@ -52,6 +50,7 @@
         }
 
         function initMidi() {
+ 
 
             if (window.navigator.requestMIDIAccess) {
 
@@ -64,18 +63,23 @@
         }
 
         function onSuccess(interface) {
+            var myMidiAccess = null;
+            var myMidiPorts = [];
+            myMidiPorts.length = 0;
 
             // Get the global MIDIAccess
             myMidiAccess = interface;
 
-            interface.onstatechange = function (event) {
+            myMidiAccess.onstatechange = function (event) {
                 var port = event.port;
                 printString("| Port state change event | Name: " + port.name + " | Connection: " + port.connection + "| State:" + port.state);
+                /*
                 if (port.type == "input" && port.state == "connected") {
                     port.onmidimessage = function (event) {
                         onMessageReceived(event.data);
                     };
                 }
+                */
             };
 
 
@@ -109,7 +113,7 @@
                 var channel = (data[0] & 0xf) + 1;
                 var note = data[1];
                 var velocity = data[2];
-                printString("| Mesg IN |Command: " + command + "| Channel: | " + channel + "| Note: | " + note + "| Velocity: | " + velocity);
+                printString("| Mesg IN |Command: " + (data[0]) + "| Channel: | " + ((data[0] & 0xf) + 1) + "| Note: | " + data[1] + "| Velocity: | " + data[2]);
             }
         }
 
