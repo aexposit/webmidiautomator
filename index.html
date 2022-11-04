@@ -38,19 +38,19 @@
         }
     </style>
     <script>
-
+        var globalMidiAcces;
 
         function clearLog() {
             document.getElementById("messagelog").innerHTML = "";
         }
-        function printString(str) {
+        function printLog(str) {
             var messagelog = document.getElementById('messagelog');
             messagelog.innerHTML += str + "\n";
             messagelog.scrollTop = messagelog.scrollHeight;
         }
 
         function initMidi() {
- 
+
 
             if (window.navigator.requestMIDIAccess) {
 
@@ -58,70 +58,65 @@
                 window.navigator.requestMIDIAccess({ sysex: false }).then(onSuccess, onFailure);
 
             } else {
-                console.log("Web MIDI API not supported!");
+                printLog("Web MIDI API not supported!");
             }
         }
 
-        function onSuccess(interface) {
-            var myMidiAccess = null;
-            var myMidiPorts = [];
-            myMidiPorts.length = 0;
-
+        function onSuccess(access) {
+            globalMidiAccess = access;
             // Get the global MIDIAccess
-            myMidiAccess = interface;
 
-            myMidiAccess.onstatechange = function (event) {
-                var port = event.port;
-                printString("| Port state change event | Name: " + port.name + " | Connection: " + port.connection + "| State:" + port.state);
-                /*
-                if (port.type == "input" && port.state == "connected") {
-                    port.onmidimessage = function (event) {
-                        onMessageReceived(event.data);
-                    };
-                }
-                */
+            updatePorts();
+
+            globalMidiAccess.onstatechange = function (event) {
+                updatePorts();
             };
-
-
-            // Grab an array of all available ports from maps
-            var iter = myMidiAccess.inputs.values();
-            for (var i = iter.next(); !i.done; i = iter.next()) {
-                myMidiPorts.push(i.value);
-
-            }
-
-            var iter = myMidiAccess.outputs.values();
-            for (var o = iter.next(); !o.done; o = iter.next()) {
-                myMidiPorts.push(o.value);
-            }
-
-
-            // Grab an array of all available ports and initialise message listeners
-
-            for (var portNum = 0; portNum < myMidiPorts.length; portNum++) {
-                printString("| Port type: " + myMidiPorts[portNum].type + " | Port name: " + myMidiPorts[portNum].name + " | Connection: " + myMidiPorts[portNum].connection + " | State: " + myMidiPorts[portNum].state);
-                if (myMidiPorts[portNum].type == "input") {
-                    myMidiPorts[portNum].onmidimessage = function (event) {
-                        onMessageReceived(event.data);
-                    };
-                }
-            }
-
-
-            function onMessageReceived(data) {
-                var command = data[0] >> 4;
-                var channel = (data[0] & 0xf) + 1;
-                var note = data[1];
-                var velocity = data[2];
-                printString("| Mesg IN |Command: " + (data[0]) + "| Channel: | " + ((data[0] & 0xf) + 1) + "| Note: | " + data[1] + "| Velocity: | " + data[2]);
-            }
         }
 
+        function printPorts(from) {
+            var iter = globalMidiAccess.inputs.values();
+            for (var i = iter.next(); !i.done; i = iter.next()) {
 
+                printLog("| Port state change event " +
+                    " | Id: " + i.value.id +
+                    " | Name: " + i.value.name +
+                    " | Connection: " + i.value.connection +
+                    " | State:" + i.value.state +
+                    " | Manufacturer:" + i.value.manufacturer +
+                    (i.value.onmidimessage ? "| OnMidi lsnr attached" : "| OnMidi msg lsnr unattached") +
+                    (i.value.onstatechange ? "| OnState lsnr attached" : "| OnState lsnr unattached")
+                );
+            }
+
+
+
+        }
+
+        function updatePorts() {
+            printLog("Number of available input ports: " + globalMidiAccess.inputs.size);
+            printLog("Number of available output ports: " + globalMidiAccess.outputs.size)
+            var iter = globalMidiAccess.inputs.values();
+            for (var i = iter.next(); !i.done; i = iter.next()) {
+                // each time there is a midi message call the onMIDIMessage function
+                if (!i.value.onmidimessage) i.value.onmidimessage = onMidiMessage;
+            }
+            var iter = globalMidiAccess.outputs.values();
+            for (var i = iter.next(); !i.done; i = iter.next()) {
+                // each time there is a midi message call the onMIDIMessage function
+                if (!i.value.onmidimessage) i.value.onmidimessage = onMidiMessage;
+            }
+            printPorts("From Updateports");
+
+        }
+
+        function onMidiMessage(message) {
+
+            printLog(message);
+        }
 
 
         function onFailure(error) {
-            console.log("Could not connect to the MIDI interface");
+            printLog("Could not connect to the MIDI interface");
         }
 
 
