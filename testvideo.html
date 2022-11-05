@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+    <title>
+        HTML | DOM Video currentTime Property
+    </title>  
+    <style>
+        h1 {
+            color: green;
+        }
+         
+        h2 {
+            font-family: Impact;
+        }
+         
+        body {
+            text-align: center;
+        }
+    </style>
+</head>
+ 
+<body>
+ 
+    <h1>GeeksforGeeks</h1>
+    <h2>
+      Video currentTime Property
+    </h2>
+    <br>
+ 
+    <video id="Test_Video"
+           width="360"
+           height="240"
+           controls>
+        <source src="samplevideo.mp4"
+                type="video/mp4">
+        <source src="movie.ogg"
+                type="video/ogg">
+    </video>
+ 
+    <p>
+      For setting the current video playback position,
+      double click the "Change Position" button.
+    </p>
+ 
+    <button ondblclick="My_Video()"
+            type="button">
+      Change Position
+    </button>
+ 
+    <script>
+        var v = document.getElementById("Test_Video");
+ 
+        function My_Video() {
+            v.currentTime = 50;
+        }
+    </script>
+ 
+</body>
+ 
+</html>
